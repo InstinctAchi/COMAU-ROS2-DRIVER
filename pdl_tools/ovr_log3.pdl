@@ -1,0 +1,48 @@
+PROGRAM ovr_log3 &PA, NOHOLD, PROG_ARM = 1, PRIORITY = 5, STACK = 10003
+  ---------------------------------------------------------------
+  --- Diagnostic: logs every override field of $ARM_DATA[1] found in
+  --- the controller config to UD:\USR\ovr_log3.txt for 2 minutes.
+  --- Only changes are written. Change the speed on the TP while it runs.
+  ---------------------------------------------------------------
+
+VAR
+  vi_i    : INTEGER NOSAVE
+  vi_lun  : INTEGER NOSAVE
+  vr_real : REAL    NOSAVE
+  vr_new  : REAL    NOSAVE
+  vi_arm_ovr : INTEGER NOSAVE
+  vi_arm_spd_ovr : INTEGER NOSAVE
+  vi_arm_acc_ovr : INTEGER NOSAVE
+  vi_arm_dec_ovr : INTEGER NOSAVE
+  vi_jog_spd_ovr : INTEGER NOSAVE
+  vi_rpl_spd_ovr : INTEGER NOSAVE
+  vi_lin_spd_rt_ovr : INTEGER NOSAVE
+
+BEGIN
+  vi_arm_ovr := -1
+  vi_arm_spd_ovr := -1
+  vi_arm_acc_ovr := -1
+  vi_arm_dec_ovr := -1
+  vi_jog_spd_ovr := -1
+  vi_rpl_spd_ovr := -1
+  vi_lin_spd_rt_ovr := -1
+  vr_real := -1.0
+  OPEN FILE vi_lun ('UD:\\USR\\ovr_log3.txt', 'rw')
+  WRITE vi_lun ('ovr_log3 start', NL)
+  FOR vi_i := 1 TO 480 DO
+    IF ($ARM_DATA[1].ARM_OVR <> vi_arm_ovr) OR ($ARM_DATA[1].ARM_SPD_OVR <> vi_arm_spd_ovr) OR ($ARM_DATA[1].ARM_ACC_OVR <> vi_arm_acc_ovr) OR ($ARM_DATA[1].ARM_DEC_OVR <> vi_arm_dec_ovr) OR ($ARM_DATA[1].JOG_SPD_OVR <> vi_jog_spd_ovr) OR ($ARM_DATA[1].RPL_SPD_OVR <> vi_rpl_spd_ovr) OR ($ARM_DATA[1].LIN_SPD_RT_OVR <> vi_lin_spd_rt_ovr) OR ($ARM_DATA[1].ARM_REAL_OVR <> vr_real) THEN
+      vi_arm_ovr := $ARM_DATA[1].ARM_OVR
+      vi_arm_spd_ovr := $ARM_DATA[1].ARM_SPD_OVR
+      vi_arm_acc_ovr := $ARM_DATA[1].ARM_ACC_OVR
+      vi_arm_dec_ovr := $ARM_DATA[1].ARM_DEC_OVR
+      vi_jog_spd_ovr := $ARM_DATA[1].JOG_SPD_OVR
+      vi_rpl_spd_ovr := $ARM_DATA[1].RPL_SPD_OVR
+      vi_lin_spd_rt_ovr := $ARM_DATA[1].LIN_SPD_RT_OVR
+      vr_real := $ARM_DATA[1].ARM_REAL_OVR
+      WRITE vi_lun ('step ', vi_i, ' ARM_OVR=', vi_arm_ovr, ' ARM_SPD_OVR=', vi_arm_spd_ovr, ' ARM_ACC_OVR=', vi_arm_acc_ovr, ' ARM_DEC_OVR=', vi_arm_dec_ovr, ' JOG_SPD_OVR=', vi_jog_spd_ovr, ' RPL_SPD_OVR=', vi_rpl_spd_ovr, ' LIN_SPD_RT_OVR=', vi_lin_spd_rt_ovr, ' ARM_REAL_OVR=', vr_real, NL)
+    ENDIF
+    DELAY 250
+  ENDFOR
+  WRITE vi_lun ('ovr_log3 done', NL)
+  CLOSE FILE vi_lun
+END ovr_log3

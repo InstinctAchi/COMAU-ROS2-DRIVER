@@ -120,8 +120,8 @@ VAR
   vp_cartesian_trajectory : PATH of POSE_NODE         EXPORTED FROM motion_server NOSAVE -- pose trajectory that will be executed   
   -- For Movefly
   vj_joint_pos            : JOINTPOS FOR ARM[KI_ARM_NUM] EXPORTED FROM motion_server -- Goal JointPos
-  vr_lin_spd              : REAL                 (0.0)NOSAVE
-  vr_fly_dist             : REAL                 (0.0)NOSAVE
+  vr_lin_spd              : REAL                 EXPORTED FROM motion_server NOSAVE -- Movefly linear speed limit [m/s], shared with arm1_handler
+  vr_fly_dist             : REAL                 EXPORTED FROM motion_server NOSAVE -- Movefly fly distance, shared with arm1_handler
   -- tcp/ip msg id
   t_msg_id                : INTEGER                (0)NOSAVE
   -- Check move workspace
@@ -494,6 +494,8 @@ BEGIN
   vs_server_host   := $NET_L[1]  -- get IP from controller settings
   vi_server_netlun := 0
   vb_workspace_in  := TRUE
+  vr_lin_spd       := 0.5
+  vr_fly_dist      := 5.0
   vs_errcode       := ''
 
   -- Copyright printout should be included in all PDL programs

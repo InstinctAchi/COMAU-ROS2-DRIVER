@@ -1,0 +1,11 @@
+PROGRAM set_ovr &PA, NOHOLD, PROG_ARM = 1, PRIORITY = 5, STACK = 10003
+  ---------------------------------------------------------------
+  --- Sets the arm override to 100 percent and prints it.
+  --- Run it once, then repeat the test move.
+  ---------------------------------------------------------------
+
+BEGIN
+  WRITE LUN_CRT ('set_ovr: ARM_OVR before = ', $ARM_OVR, NL)
+  $ARM_OVR := 100
+  WRITE LUN_CRT ('set_ovr: ARM_OVR after  = ', $ARM_OVR, NL)
+END set_ovr

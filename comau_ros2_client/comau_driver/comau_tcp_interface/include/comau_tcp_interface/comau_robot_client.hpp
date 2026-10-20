@@ -162,6 +162,10 @@ public:
    */
   bool sendIOMessage(int pin, bool state);
   /**
+   * @brief Sends the arm speed override (percent, 1..100) that the PDL applies to $ARM_OVR
+   */
+  bool sendSpeedOverrideMessage(uint32_t percent);
+  /**
    * @brief Sends the Arm state message
    *
    * @param

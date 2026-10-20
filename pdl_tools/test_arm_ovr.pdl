@@ -1,0 +1,18 @@
+PROGRAM test_arm_ovr &PA, NOHOLD, PROG_ARM = 1, PRIORITY = 5, STACK = 10003
+  ---------------------------------------------------------------
+  --- Diagnostic: prints the arm speed override for 60 seconds.
+  --- Run it, then change the speed override on the TP and check
+  --- that the printed value follows it.
+  ---------------------------------------------------------------
+
+VAR
+  vi_i : INTEGER NOSAVE
+
+BEGIN
+  WRITE LUN_CRT ('test_arm_ovr: change the speed override on the TP now', NL)
+  FOR vi_i := 1 TO 120 DO
+    WRITE LUN_CRT ('ARM_OVR = ', $ARM_OVR, NL)
+    DELAY 500
+  ENDFOR
+  WRITE LUN_CRT ('test_arm_ovr: done', NL)
+END test_arm_ovr

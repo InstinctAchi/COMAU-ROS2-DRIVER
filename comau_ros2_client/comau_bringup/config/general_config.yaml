@@ -10,7 +10,7 @@ execute_trajectory_handler_node:
     use_robot_server: true
     use_state_server: true
     verbose: true
-    robot_ip: "192.168.56.2"      # this the the IP of the Robot
+    robot_ip: "192.168.2.1"      # this the the IP of the Robot
     arm1_server_port: "1101"      # the port of TCP for Arm1 server
     state_server_port: "1104"     # the port of TCP state server
     robot_server_port: "1105"     # the port of TCP robot/executor server

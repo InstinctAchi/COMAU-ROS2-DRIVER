@@ -90,6 +90,7 @@ public:
   inline static const char IO = 'O';
   inline static const char LOCK = 'L';
   inline static const char UNLOCK = 'U';
+  inline static const char SPEED_OVERRIDE = 'V';
 };
 
 namespace utils {

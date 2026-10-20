@@ -1,0 +1,33 @@
+PROGRAM ovr_log2 &PA, NOHOLD, PROG_ARM = 1, PRIORITY = 5, STACK = 10003
+  ---------------------------------------------------------------
+  --- Diagnostic: logs the arm override fields found in the controller
+  --- config ($ARM_DATA[1].ARM_OVR / ARM_SPD_OVR / ARM_REAL_OVR) to
+  --- UD:\USR\ovr_log2.txt for 2 minutes. Only changes are written.
+  --- Change the speed on the TP while it runs.
+  ---------------------------------------------------------------
+
+VAR
+  vi_i    : INTEGER NOSAVE
+  vi_ovr  : INTEGER NOSAVE
+  vi_spd  : INTEGER NOSAVE
+  vr_real : REAL    NOSAVE
+  vi_lun  : INTEGER NOSAVE
+
+BEGIN
+  vi_ovr := -1
+  vi_spd := -1
+  vr_real := -1.0
+  OPEN FILE vi_lun ('UD:\\USR\\ovr_log2.txt', 'rw')
+  WRITE vi_lun ('ovr_log2 start', NL)
+  FOR vi_i := 1 TO 480 DO
+    IF ($ARM_DATA[1].ARM_OVR <> vi_ovr) OR ($ARM_DATA[1].ARM_SPD_OVR <> vi_spd) OR ($ARM_DATA[1].ARM_REAL_OVR <> vr_real) THEN
+      vi_ovr  := $ARM_DATA[1].ARM_OVR
+      vi_spd  := $ARM_DATA[1].ARM_SPD_OVR
+      vr_real := $ARM_DATA[1].ARM_REAL_OVR
+      WRITE vi_lun ('step ', vi_i, ' ARM_OVR = ', vi_ovr, '  ARM_SPD_OVR = ', vi_spd, '  ARM_REAL_OVR = ', vr_real, NL)
+    ENDIF
+    DELAY 250
+  ENDFOR
+  WRITE vi_lun ('ovr_log2 done', NL)
+  CLOSE FILE vi_lun
+END ovr_log2

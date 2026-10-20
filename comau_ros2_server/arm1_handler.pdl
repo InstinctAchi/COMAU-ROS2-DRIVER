@@ -100,8 +100,16 @@ VAR
   vp_cartesian_trajectory : PATH of POSE_NODE         EXPORTED FROM motion_server NOSAVE  -- pose trajectory that will be executed   
   -- For Movefly
   vj_joint_pos            : JOINTPOS FOR ARM[KI_ARM_NUM]  EXPORTED FROM motion_server -- Goal JointPos
-  vr_lin_spd              : REAL                 (0.0)NOSAVE
-  vr_fly_dist             : REAL                 (0.0)NOSAVE
+  vr_lin_spd              : REAL                 EXPORTED FROM motion_server NOSAVE
+  _si_arm_ovr       : INTEGER   EXPORTED FROM pdl_tcp_functions NOSAVE -- Arm speed override (percent, 1..100) requested by the ROS driver; -1 = not requested yet
+  vr_fly_dist             : REAL                 EXPORTED FROM motion_server NOSAVE
+  -- MOVEFLY acceleration / deceleration overrides (percent, 1..100) of this program: lower = smoother starts
+  -- and stops of every streamed step, but more lag. Editable on the TP while the program runs.
+  vi_fly_acc_ovr          : INTEGER              (50) NOSAVE
+  vi_fly_dec_ovr          : INTEGER              (50) NOSAVE
+  -- DIAGNOSTIC (tremor investigation): last MOVEFLY params written to the screen log
+  vr_log_lin_spd         : REAL                (-1.0)NOSAVE
+  vr_log_fly_dist         : REAL                (-1.0)NOSAVE
   -- tcp/ip msg id
   t_msg_id                : INTEGER                (0)NOSAVE
   -- Check move workspace
@@ -306,14 +314,36 @@ BEGIN
   $TURN_CARE := TRUE   -- Check the configuration turns
   $CNFG_CARE := FALSE
 
+  -- DIAGNOSTIC: force the first MOVEFLY to log its params
+  vr_log_lin_spd  := -1.0
+  vr_log_fly_dist := -1.0
+
   REPEAT
+
+    -- Apply the arm speed override requested by the ROS driver (arm context: PROG_ARM = 1)
+    IF (_si_arm_ovr >= 1) AND (_si_arm_ovr <= 100) THEN
+      IF $ARM_OVR <> _si_arm_ovr THEN
+        $ARM_OVR := _si_arm_ovr
+      ENDIF
+    ENDIF
+
+    -- Acceleration / deceleration overrides of the streamed MOVEFLY steps (program context)
+    IF (vi_fly_acc_ovr >= 1) AND (vi_fly_acc_ovr <= 100) THEN
+      IF $PROG_ACC_OVR <> vi_fly_acc_ovr THEN
+        $PROG_ACC_OVR := vi_fly_acc_ovr
+      ENDIF
+    ENDIF
+    IF (vi_fly_dec_ovr >= 1) AND (vi_fly_dec_ovr <= 100) THEN
+      IF $PROG_DEC_OVR <> vi_fly_dec_ovr THEN
+        $PROG_DEC_OVR := vi_fly_dec_ovr
+      ENDIF
+    ENDIF
 
     -- Execute command
     IF _sb_enable_robot = TRUE THEN
 
       -- Robot is moving
       _ss_state := 'M'
-      WRITE _vs_screen_lun(KS_MAIN_LOG, "Moving! ", NL)
       _sb_enable_robot := FALSE -- VE_ATTENTION
       SELECT vs_motion_type OF 
         CASE ('N'):
@@ -406,9 +436,16 @@ BEGIN
             vb_workspace_in := TRUE
             throw_error('Node out of workspace.', KS_MAIN_LOG)
           ELSE
+            -- DIAGNOSTIC: log the params only when they change (a WRITE on every MOVEFLY perturbs the timing)
+            IF (vr_lin_spd <> vr_log_lin_spd) OR (vr_fly_dist <> vr_log_fly_dist) THEN
+              vr_log_lin_spd  := vr_lin_spd
+              vr_log_fly_dist := vr_fly_dist
+              WRITE _vs_screen_lun (KS_MAIN_LOG, 'MOVEFLY lin_spd=', vr_lin_spd, ' fly_dist=', vr_fly_dist, ' arm_ovr=', $ARM_OVR, NL)
+            ENDIF
+            -- TEST (hypothesis 1): $SPD_EMT = SPD_LIN added, as in the cartesian trajectories of motion_server
             MOVEFLY ARM[KI_ARM_NUM] LINEAR TO vj_joint_pos ADVANCE,
               WITH $FLY_TYPE = FLY_CART, $MOVE_TYPE = LINEAR, $FLY_TRAJ = FLY_TOL, $STRESS_PER = 50, $FLY_DIST = vr_fly_dist,
-              WITH $TERM_TYPE = COARSE, $TOL_COARSE = 1, $LIN_SPD = vr_lin_spd
+              WITH $TERM_TYPE = COARSE, $TOL_COARSE = 1, $SPD_EMT = SPD_LIN, $LIN_SPD = vr_lin_spd
             ENDMOVE  
             DELAY 1
           ENDIF

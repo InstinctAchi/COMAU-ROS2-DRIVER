@@ -17,7 +17,11 @@
 #include "rclcpp_lifecycle/state.hpp"
 #include "rclcpp/macros.hpp"
 #include "rclcpp/rclcpp.hpp"
+#if __has_include(<realtime_tools/realtime_publisher.hpp>)
+#include "realtime_tools/realtime_publisher.hpp"
+#else
 #include "realtime_tools/realtime_publisher.h"
+#endif
 #include "trajectory_msgs/msg/joint_trajectory.hpp"
 #include "trajectory_msgs/msg/joint_trajectory_point.hpp"
 
