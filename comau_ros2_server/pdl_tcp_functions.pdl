@@ -57,6 +57,7 @@ VAR
   _vb_first_sns_trk : BOOLEAN   EXPORTED FROM pdl_tcp_functions NOSAVE
   _si_delay_change_sts : INTEGER EXPORTED FROM pdl_tcp_functions NOSAVE
   _si_publish_freq  : INTEGER   EXPORTED FROM pdl_tcp_functions NOSAVE -- The frequency in Hz that will publish the state message. 25 Hz is ideal for real robot communication.
+  _si_arm_ovr       : INTEGER   EXPORTED FROM pdl_tcp_functions NOSAVE -- Arm speed override (percent, 1..100) requested by the ROS driver; -1 = not requested yet
 
   -- Shared variables for sensor tracking configuration
   _si_sensor_type           : INTEGER EXPORTED FROM pdl_tcp_functions NOSAVE  -- The mode of Sensor Tracking     
@@ -259,6 +260,7 @@ BEGIN
   _sb_unlock_robot  := FALSE
   _si_verbose       := 1
   _vs_screen_lun    := LUN_CRT
+  _si_arm_ovr       := -1 -- speed override not requested yet: the arm override is left untouched
   _sb_robot_init    := FALSE
   _vb_first_sns_trk := TRUE
 

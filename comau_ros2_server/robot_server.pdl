@@ -89,6 +89,8 @@ VAR
   vb_comm_success  : BOOLEAN          (TRUE)NOSAVE     -- Communication status flag
   vi_pin           : INTEGER             (0)NOSAVE     -- DOUT pin number to change state
   vi_pin_state     : INTEGER             (0)NOSAVE     -- DOUT pin state to change to
+  vi_ovr           : INTEGER             (0)NOSAVE     -- Arm speed override requested (percent)
+  _si_arm_ovr       : INTEGER   EXPORTED FROM pdl_tcp_functions NOSAVE -- Arm speed override (percent, 1..100) requested by the ROS driver; -1 = not requested yet
   vi_ti            : INTEGER             (0)NOSAVE
 
 -- Declaration of shared functions 
@@ -291,6 +293,16 @@ BEGIN
       ENDIF
       IF vi_pin_state = 0 THEN
         $DOUT[vi_pin] := FALSE
+      ENDIF
+    CASE('V'):  -- Arm speed override (percent), applied by arm1_handler
+      ERR_TRAP_ON(39990, 39991, 39992)
+      READ vi_server_netlun (vi_ovr::4)
+      ERR_TRAP_OFF(39990, 39991, 39992)
+      IF (ru_check_error = 1) THEN -- Return and try restarting in error case
+        RETURN(FALSE)
+      ENDIF
+      IF (vi_ovr >= 1) AND (vi_ovr <= 100) THEN
+        _si_arm_ovr := vi_ovr
       ENDIF
     CASE('L'):  -- Lock robot
       _sb_lock_robot := TRUE
