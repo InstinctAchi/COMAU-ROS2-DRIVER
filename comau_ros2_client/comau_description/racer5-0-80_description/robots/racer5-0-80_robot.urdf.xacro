@@ -8,6 +8,6 @@
 
   <!-- Import robot ros2_control description -->
   <xacro:include filename="$(find racer5-0-80_description)/ros2_control/racer5-0-80.ros2_control.xacro" />
-  <xacro:robot_ros2_control name="racer5-0-80"/>
+  <xacro:robot_ros2_control name="racer5_0_80"/>
 
 </robot>

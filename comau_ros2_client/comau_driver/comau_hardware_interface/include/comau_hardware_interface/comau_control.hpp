@@ -30,9 +30,17 @@
 #include "rclcpp/timer.hpp"
 #include "rclcpp_lifecycle/lifecycle_publisher.hpp"
 #include "rclcpp_lifecycle/node_interfaces/lifecycle_node_interface.hpp"
+#if __has_include(<realtime_tools/realtime_buffer.hpp>)
+#include "realtime_tools/realtime_buffer.hpp"
+#else
 #include "realtime_tools/realtime_buffer.h"
+#endif
 #include "trajectory_msgs/msg/joint_trajectory.hpp"
 #include "trajectory_msgs/msg/joint_trajectory_point.hpp"
+
+#ifndef CONTROLLER_INTERFACE_PUBLIC
+#define CONTROLLER_INTERFACE_PUBLIC
+#endif
 
 namespace comau_hardware_interface
 {

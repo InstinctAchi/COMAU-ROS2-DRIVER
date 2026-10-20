@@ -52,6 +52,7 @@ std::unordered_map<std::string, MessagePackage::_type_variants> MessagePackage::
     {"num_joints", uint32_t()},
     {"jnt_type", vector10i_t()},
     {"stsSelector", uint32_t()},
+    {"speed_override", uint32_t()},              ///< arm speed override 1..100 %, sent with the SPEED_OVERRIDE robot command
 };
 
 void MessagePackage::setZero() {

@@ -1,0 +1,9 @@
+
+# colcon / python / local data
+comau_ros2_client/build/
+comau_ros2_client/install/
+comau_ros2_client/log/
+__pycache__/
+*.pyc
+pdl_tools/prove/
+pdl_tools/servo_test/runs/

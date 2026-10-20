@@ -26,12 +26,16 @@
   <depend>pluginlib</depend>
   <depend>tf2_ros</depend>
   <depend>std_msgs</depend>
+  <depend>action_msgs</depend>
   <depend>geometry_msgs</depend>
   <depend>comau_msgs</depend>
   <depend>comau_driver</depend>
+  <depend>comau_tcp_interface</depend>
   <depend>comau_handlers</depend>
   <depend>joint_limits</depend>
   <depend>urdf</depend>
+  <depend>kdl_parser</depend>
+  <depend>realtime_tools</depend>
   <depend>trajectory_msgs</depend>
   <depend>tf2_geometry_msgs</depend>
   <depend>joint_state_broadcaster</depend>

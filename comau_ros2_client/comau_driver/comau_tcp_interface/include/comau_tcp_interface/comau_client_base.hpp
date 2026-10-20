@@ -73,6 +73,9 @@ public:
   utils::vectorstr_t getSendArmStateRecipe() {
     return arm_state_msg_descr_;
   }
+  utils::vectorstr_t getSendSpeedOverrideRecipe() {
+    return speed_ovr_msg_descr_;
+  }
 
 protected:
   virtual void receive(std::chrono::milliseconds timeout) = 0;
@@ -94,6 +97,7 @@ protected:
   std::vector<std::string> configuration_msg_descr_;
   std::vector<std::string> io_msg_descr_;
   std::vector<std::string> arm_state_msg_descr_;
+  std::vector<std::string> speed_ovr_msg_descr_;
 };
 
 } // namespace comau_tcp_interface

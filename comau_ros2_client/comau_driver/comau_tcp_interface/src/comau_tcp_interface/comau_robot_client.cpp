@@ -68,6 +68,9 @@ bool RobotClient::initialize(const ComauTcpInterfaceParameters &params) {
   io_msg_descr_.push_back("robot_command");
   io_msg_descr_.push_back("set_pin");
   io_msg_descr_.push_back("set_pin_state");
+  // speed override msg
+  speed_ovr_msg_descr_.push_back("robot_command");
+  speed_ovr_msg_descr_.push_back("speed_override");
   // traj joint msg
   traj_joint_msg_descr_.push_back("motion_type");
   traj_joint_msg_descr_.push_back("trajectory_size");
@@ -350,6 +353,18 @@ bool RobotClient::sendSensorConfigurationMessage(int &sensor_type, int &sensor_c
     return false;
   }
 }
+bool RobotClient::sendSpeedOverrideMessage(uint32_t percent) {
+  utils::MessagePackage msg(getSendSpeedOverrideRecipe());
+  bool com1 = msg.setData("robot_command", RobotCommand::SPEED_OVERRIDE);
+  bool com2 = msg.setData("speed_override", percent);
+  if (com1 && com2) {
+    return send(msg);
+  } else {
+    RCLCPP_ERROR_STREAM(rclcpp::get_logger(params_ptr_->log_tag), " Send message failed ");
+    return false;
+  }
+}
+
 bool RobotClient::sendIOMessage(int pin, bool state) {
   int32_t state_on = 1;
   int32_t state_off = 0;

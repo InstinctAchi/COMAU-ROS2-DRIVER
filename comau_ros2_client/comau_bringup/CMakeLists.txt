@@ -14,17 +14,6 @@ endif()
 # find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
-find_package(aura_description REQUIRED)
-find_package(nj4-110_description REQUIRED)
-find_package(nj4-170-29_description REQUIRED)
-find_package(nj-165-30_description REQUIRED)
-find_package(nj130-26_description REQUIRED)
-find_package(nj220_description REQUIRED)
-find_package(racer5-0-80_description REQUIRED)
-find_package(racer5-cobot_description REQUIRED)
-find_package(racer5-cobot-rail_description REQUIRED)
-find_package(racer7-14_description REQUIRED)
-find_package(nj60_description REQUIRED)
 
 install(
   DIRECTORY
