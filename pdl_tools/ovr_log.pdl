@@ -1,0 +1,27 @@
+PROGRAM ovr_log &PA, NOHOLD, PROG_ARM = 1, PRIORITY = 5, STACK = 10003
+  ---------------------------------------------------------------
+  --- Diagnostic: logs $ARM_OVR to UD:\USR\ovr_log.txt for 2 minutes.
+  --- Only value changes are written, so change the speed override
+  --- on the TP (e.g. 100 -> 50 -> 10 -> 100) while it runs.
+  ---------------------------------------------------------------
+
+VAR
+  vi_i    : INTEGER NOSAVE
+  vi_last : INTEGER NOSAVE
+  vi_lun  : INTEGER NOSAVE
+
+BEGIN
+  vi_last := -1
+  OPEN FILE vi_lun ('UD:\\USR\\ovr_log.txt', 'rw')
+  WRITE vi_lun ('ovr_log start', NL)
+  FOR vi_i := 1 TO 480 DO
+    IF $ARM_OVR <> vi_last THEN
+      vi_last := $ARM_OVR
+      WRITE vi_lun ('step ', vi_i, ' ARM_OVR = ', vi_last, NL)
+      WRITE LUN_CRT ('ARM_OVR = ', vi_last, NL)
+    ENDIF
+    DELAY 250
+  ENDFOR
+  WRITE vi_lun ('ovr_log done', NL)
+  CLOSE FILE vi_lun
+END ovr_log
