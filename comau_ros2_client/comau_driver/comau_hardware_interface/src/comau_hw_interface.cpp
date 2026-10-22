@@ -105,6 +105,10 @@ CallbackReturn ComauHardwareInterface::on_init(const hardware_interface::Hardwar
     const std::string value = info_.hardware_parameters.at("fly_speed_adaptive");
     fly_speed_adaptive_ = !(value == "false" || value == "False" || value == "0");
   }
+  if (info_.hardware_parameters.find("fly_override_compensation") != info_.hardware_parameters.end()) {
+    const std::string value = info_.hardware_parameters.at("fly_override_compensation");
+    fly_override_comp_ = !(value == "false" || value == "False" || value == "0");
+  }
   if (info_.hardware_parameters.find("fly_speed_margin") != info_.hardware_parameters.end()) {
     try {
       fly_speed_margin_ = std::clamp(std::stof(info_.hardware_parameters.at("fly_speed_margin")), 1.0f, 5.0f);
@@ -271,7 +275,13 @@ float ComauHardwareInterface::adaptiveFlySpeed(double dt)
   have_prev_tcp_ = true;
 
   const double lag = (tcp_cmd - tcp_meas).Norm();
-  const double v = fly_speed_margin_.load() * v_traj + fly_speed_gain_.load() * lag;
+  // Speed the robot must have (reference speed plus lag recovery) ...
+  double v = fly_speed_margin_.load() * v_traj + fly_speed_gain_.load() * lag;
+  // ... asked as the speed it has at 100%: the override the controller is applying scales it back down. `sent_override_`
+  // is the percentage the controller was told (-1: none sent yet, i.e. 100%).
+  if (fly_override_comp_.load() && sent_override_ > 0 && sent_override_ < 100) {
+    v /= std::max(0.01, sent_override_ / 100.0);
+  }
   const float floor = std::min(fly_speed_min_.load(), cap);
   float speed = std::clamp(static_cast<float>(v), floor, cap);
 
@@ -481,6 +491,13 @@ CallbackReturn ComauHardwareInterface::on_activate(const rclcpp_lifecycle::State
                     !msg->data ? "off (fixed fly_lin_velocity)" :
                     fk_ready_ ? "on" : "requested but unavailable (no forward kinematics)");
       });
+    fly_comp_sub_ = node->create_subscription<std_msgs::msg::Bool>(
+      "/comau/fly_override_compensation", rclcpp::QoS(1).reliable(),
+      [this](const std_msgs::msg::Bool::SharedPtr msg) {
+        fly_override_comp_ = msg->data;
+        RCLCPP_INFO(rclcpp::get_logger("ComauHardwareInterface"), "MOVEFLY speed compensation of the speed override %s",
+                    msg->data ? "on" : "off");
+      });
     fly_margin_sub_ = node->create_subscription<std_msgs::msg::Float32>(
       "/comau/fly_speed_margin", rclcpp::QoS(1).reliable(),
       [this](const std_msgs::msg::Float32::SharedPtr msg) {
@@ -560,6 +577,7 @@ CallbackReturn ComauHardwareInterface::on_deactivate(const rclcpp_lifecycle::Sta
   fly_vel_sub_.reset();
   fly_dist_sub_.reset();
   fly_adaptive_sub_.reset();
+  fly_comp_sub_.reset();
   fly_margin_sub_.reset();
   fly_gain_sub_.reset();
   fly_slew_sub_.reset();
