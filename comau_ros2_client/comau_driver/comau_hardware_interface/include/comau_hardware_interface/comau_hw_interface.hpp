@@ -94,6 +94,12 @@ protected:
   // Runtime topics: /comau/fly_speed_adaptive (Bool), /comau/fly_speed_margin, /comau/fly_speed_gain (Float32).
   // The speed actually sent is published on /comau/fly_lin_velocity_sent.
   std::atomic<bool> fly_speed_adaptive_{true};
+  // The controller applies the speed override ($ARM_OVR) on top of the MOVEFLY speed, while the trajectory controller
+  // already slows the reference with the speed scaling: the speed asked from the controller is divided by the override
+  // it is applying, so the robot ends up at the speed of the (already slowed) reference and neither falls behind nor jumps
+  // when the override goes back to 100%. Runtime topic /comau/fly_override_compensation (Bool); hardware parameter
+  // fly_override_compensation.
+  std::atomic<bool> fly_override_comp_{true};
   std::atomic<float> fly_speed_margin_{1.3f};   // multiplier on the trajectory TCP speed
   std::atomic<float> fly_speed_gain_{4.0f};     // 1/s, lag recovery: extra speed per metre of TCP lag (1 left a ~0.8 s tail)
   std::atomic<float> fly_speed_min_{0.01f};     // m/s, floor (rotation-only steps have ~0 linear speed)
@@ -140,6 +146,7 @@ protected:
   double time_since_send_{0.0};
 
   rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr fly_adaptive_sub_;
+  rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr fly_comp_sub_;
   rclcpp::Subscription<std_msgs::msg::Float32>::SharedPtr fly_margin_sub_;
   rclcpp::Subscription<std_msgs::msg::Float32>::SharedPtr fly_gain_sub_;
   std::shared_ptr<rclcpp::Publisher<std_msgs::msg::Float32>> fly_speed_pub_;
